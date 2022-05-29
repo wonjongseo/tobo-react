@@ -1,7 +1,8 @@
-import React from "react";
 import {createGlobalStyle} from "styled-components";
-import TodoList from "./routes/TodoList";
 
+import {ReactQueryDevtools} from "react-query/devtools";
+import Home from "./routes/Home";
+import TodoList from "./components/TodoList";
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
 html, body, div, span, applet, object, iframe,
