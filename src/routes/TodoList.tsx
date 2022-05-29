@@ -1,107 +1,41 @@
 import {useForm} from "react-hook-form";
+import {atom, useRecoilState} from "recoil";
 
+interface IToDo {
+    text: string;
+    id: number;
+    category: "TO_DO" | "DOING" | "DONE";
+}
 interface IForm {
-    email: string;
-    firstName: string;
-    lastName: string;
-    username: string;
-    password: string;
-    password2: string;
-    extraError?: string;
+    toDo: string;
 }
 
+const toDoState = atom<IToDo[]>({
+    key: "toDo",
+    default: [],
+});
+
 const TodoList = () => {
-    const {
-        register,
-        handleSubmit,
-        formState: {errors},
-        setError,
-    } = useForm<IForm>({
-        defaultValues: {
-            email: "@naver.com",
-        },
-    });
-
-    const onValid = (data: IForm) => {
-        if (data.password !== data.password2) {
-            setError(
-                "password2",
-                {message: "Password are not the same"},
-                {shouldFocus: true}
-            );
-        }
-        // setError("extraError", {message: "Server Offline"});
+    const [toDos, setToDos] = useRecoilState(toDoState);
+    const {register, handleSubmit, setValue} = useForm<IForm>();
+    const handleValid = ({toDo}: IForm) => {
+        setToDos((prev) => [
+            {text: toDo, id: Date.now(), category: "TO_DO"},
+            ...prev,
+        ]);
+        setValue("toDo", "");
     };
-
     return (
         <div>
-            <form
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                }}
-                onSubmit={handleSubmit(onValid)}
-            >
-                <input
-                    {...register("email", {
-                        required: "Email is required",
-                        pattern: {
-                            value: /^[A-Za-z0-9._%+-]+@naver.com$/,
-                            message: "Only naver.com emails allowed",
-                        },
-                    })}
-                    placeholder="email"
-                />
-                <span>{errors?.email?.message}</span>
-                <input
-                    {...register("firstName", {
-                        required: "Write a something",
-                        validate: {
-                            oneCheck: (value) =>
-                                value.includes("one") ? "No one allowds" : true,
-                            thowCheck: (value) =>
-                                value.includes("two") ? "No two allowds" : true,
-                        },
-                    })}
-                    placeholder="first name"
-                />
-                <span>{errors?.firstName?.message}</span>
-                <input
-                    {...register("lastName", {
-                        required: "Write a something",
-                    })}
-                    placeholder="last name"
-                />
-                <span>{errors?.lastName?.message}</span>
-                <input
-                    {...register("username", {
-                        required: "Write a something",
-                        minLength: {
-                            value: 5,
-                            message: "Too Short",
-                        },
-                    })}
-                    placeholder="username"
-                />
-                <span>{errors?.username?.message}</span>
-                <input
-                    {...register("password", {
-                        required: true,
-                        minLength: 5,
-                    })}
-                    placeholder="password"
-                />
-                <span>{errors?.password?.message}</span>
-                <input
-                    {...register("password2", {
-                        required: "Write a something",
-                        minLength: 5,
-                    })}
-                    placeholder="password2"
-                />
-                <span>{errors?.password2?.message}</span>
-                <button>Add</button>
+            <form onSubmit={handleSubmit(handleValid)}>
+                <input {...register("toDo")} placeholder="Write a To Do" />
+                <button>Add Todo</button>
             </form>
+            <ul>
+                {toDos.map((todo) => (
+                    <li key={todo.id}>{todo.text}</li>
+                ))}
+            </ul>
         </div>
     );
 };
